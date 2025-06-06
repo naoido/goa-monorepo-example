@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args:
+        SERVICE_NAME: auth
+    image: goa-microservice/auth-service:latest
+    ports:
+      - "8090:8090"
+    environment:
+      - JWT_SECRET=secret
+    restart: unless-stopped
+
+  greet:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args:
+        SERVICE_NAME: greet
+    ports:
+      - "8091:8090"
+    environment:
+      - JWT_SECRET=secret
+    restart: unless-stopped

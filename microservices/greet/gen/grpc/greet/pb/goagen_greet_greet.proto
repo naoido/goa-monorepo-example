@@ -1,0 +1,34 @@
+// Code generated with goa v3.21.1, DO NOT EDIT.
+//
+// greet protocol buffer definition
+//
+// Command:
+// $ goa gen goa-example/microservices/greet/design
+
+syntax = "proto3";
+
+package greet.v1;
+
+option go_package = "/greet.v1pb";
+
+// Greet service
+service Greet {
+	// Greet method
+	rpc Greet (GreetRequest) returns (GreetResponse);
+	// Hello method
+	rpc Hello (HelloRequest) returns (HelloResponse);
+}
+
+message GreetRequest {
+}
+
+message GreetResponse {
+	string field = 1;
+}
+
+message HelloRequest {
+}
+
+message HelloResponse {
+	string field = 1;
+}

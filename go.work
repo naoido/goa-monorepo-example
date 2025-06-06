@@ -1,0 +1,7 @@
+go 1.24.0
+
+use (
+	./microservices/auth
+	./microservices/greet
+	./pkg/security
+)

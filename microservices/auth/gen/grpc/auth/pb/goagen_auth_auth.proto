@@ -1,0 +1,50 @@
+// Code generated with goa v3.21.1, DO NOT EDIT.
+//
+// auth protocol buffer definition
+//
+// Command:
+// $ goa gen goa-example/microservices/auth/design
+
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "/auth.v1pb";
+
+// The auth service
+service Auth {
+	// Login
+	rpc Login (LoginRequest) returns (LoginResponse);
+	// Logout
+	rpc Logout (LogoutRequest) returns (LogoutResponse);
+	// Refresh
+	rpc Refresh (RefreshRequest) returns (RefreshResponse);
+}
+
+message LoginRequest {
+	// username
+	string username = 1;
+	// password
+	string password = 2;
+}
+
+message LoginResponse {
+	string access_token = 1;
+	string refresh_token = 2;
+}
+
+message LogoutRequest {
+}
+
+message LogoutResponse {
+}
+
+message RefreshRequest {
+	// refresh_token
+	string refresh_token = 1;
+}
+
+message RefreshResponse {
+	string access_token = 1;
+	string refresh_token = 2;
+}
