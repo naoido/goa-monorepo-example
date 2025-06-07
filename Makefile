@@ -5,7 +5,7 @@ gen-greet:
 	cd microservices/greet && goa gen goa-example/microservices/greet/design
 
 run-auth:
-	cd microservices/auth && export JWT_SECRET=secret && go build -o auth cmd/auth/main.go && ./auth
+	cd microservices/auth && export JWT_SECRET=secret && go build -o auth ./cmd/auth && ./auth
 
 run-greet:
-	cd microservices/greet && export JWT_SECRET=secret && go build -o greet cmd/greet/main.go && ./greet
+	cd microservices/greet && export JWT_SECRET=secret && go build -o greet ./cmd/greet && ./greet

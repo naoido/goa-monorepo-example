@@ -1,34 +1,44 @@
 package greet
 
 import (
+	"context"
 	"fmt"
-	"goa-example/microservices/greet/gen/greet"
-	"goa-example/pkg/security"
-	security2 "goa.design/goa/v3/security"
-	"golang.org/x/net/context"
+	greet "goa-example/microservices/greet/gen/greet"
+	security2 "goa-example/pkg/security"
+
+	"goa.design/clue/log"
+	"goa.design/goa/v3/security"
 )
 
-type GreetService struct{}
+// greet service example implementation.
+// The example methods log the requests and return zero values.
+type greetsrvc struct{}
 
-func NewGreetService() *GreetService {
-	return &GreetService{}
+// NewGreet returns the greet service implementation.
+func NewGreet() greet.Service {
+	return &greetsrvc{}
 }
 
-func (*GreetService) JWTAuth(ctx context.Context, token string, scheme *security2.JWTScheme) (context.Context, error) {
-	claims, err := security.ValidToken(token)
+// JWTAuth implements the authorization logic for service "greet" for the "jwt"
+// security scheme.
+func (s *greetsrvc) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
+	claims, err := security2.ValidToken(token)
 	if err != nil {
 		return ctx, err
 	}
 
-	return security.HasPermission(ctx, claims, scheme)
+	return security2.HasPermission(ctx, claims, scheme)
 }
 
-func (*GreetService) Greet(ctx context.Context) (string, error) {
+// Greet method
+func (s *greetsrvc) Greet(ctx context.Context) (res string, err error) {
 	return "Hello World!", nil
 }
 
-func (*GreetService) Hello(ctx context.Context, p *greet.HelloPayload) (string, error) {
-	username := security.ContextAuthInfo(ctx).Claims["sub"].(string)
+// Hello method
+func (s *greetsrvc) Hello(ctx context.Context, p *greet.HelloPayload) (res string, err error) {
+	username := security2.ContextAuthInfo(ctx).Claims["sub"].(string)
+	log.Print(ctx, log.KV{K: "username", V: username})
 
 	return fmt.Sprintf("Hello %s!", username), nil
 }

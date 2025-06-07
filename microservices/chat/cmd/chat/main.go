@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	greetapi "goa-example/microservices/greet"
-	greet "goa-example/microservices/greet/gen/greet"
+	chatapi "goa-example/microservices/chat"
+	chat "goa-example/microservices/chat/gen/chat"
 	"net"
 	"net/url"
 	"os"
@@ -23,7 +23,7 @@ func main() {
 	var (
 		hostF     = flag.String("host", "localhost", "Server host (valid values: localhost)")
 		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
-		grpcPortF = flag.String("grpc-port", "8090", "gRPC port (overrides host gRPC port specified in service design)")
+		grpcPortF = flag.String("grpc-port", "", "gRPC port (overrides host gRPC port specified in service design)")
 		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
 		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
 	)
@@ -39,24 +39,25 @@ func main() {
 		ctx = log.Context(ctx, log.WithDebug())
 		log.Debugf(ctx, "debug logs enabled")
 	}
+	log.Print(ctx, log.KV{K: "http-port", V: *httpPortF})
 
 	// Initialize the services.
 	var (
-		greetSvc greet.Service
+		chatSvc chat.Service
 	)
 	{
-		greetSvc = greetapi.NewGreet()
+		chatSvc = chatapi.NewChat()
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
-		greetEndpoints *greet.Endpoints
+		chatEndpoints *chat.Endpoints
 	)
 	{
-		greetEndpoints = greet.NewEndpoints(greetSvc)
-		greetEndpoints.Use(debug.LogPayloads())
-		greetEndpoints.Use(log.Endpoint)
+		chatEndpoints = chat.NewEndpoints(chatSvc)
+		chatEndpoints.Use(debug.LogPayloads())
+		chatEndpoints.Use(log.Endpoint)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -99,7 +100,7 @@ func main() {
 			} else if u.Port() == "" {
 				u.Host = net.JoinHostPort(u.Host, "8080")
 			}
-			handleGRPCServer(ctx, u, greetEndpoints, &wg, errc, *dbgF)
+			handleGRPCServer(ctx, u, chatEndpoints, &wg, errc, *dbgF)
 		}
 
 	default:

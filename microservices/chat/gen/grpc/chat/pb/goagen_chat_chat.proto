@@ -1,0 +1,25 @@
+// Code generated with goa v3.21.1, DO NOT EDIT.
+//
+// chat protocol buffer definition
+//
+// Command:
+// $ goa gen goa-example/microservices/chat/design
+
+syntax = "proto3";
+
+package chat.v1;
+
+option go_package = "/chat.v1pb";
+
+// The chat service invokes the chat.
+service Chat {
+	// Creates a new chat room.
+	rpc CreatRoom (CreatRoomRequest) returns (CreatRoomResponse);
+}
+
+message CreatRoomRequest {
+}
+
+message CreatRoomResponse {
+	string field = 1;
+}
