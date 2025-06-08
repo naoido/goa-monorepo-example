@@ -1,4 +1,8 @@
 # ✨ Monorepo Microservice Example with Goa
+## Speaker Deck
+説明資料入れてます！
+https://speakerdeck.com/naoido/goadeshi-merumaikurosabisu
+
 ## Requirements Tools
 ```sh
 brew install go
