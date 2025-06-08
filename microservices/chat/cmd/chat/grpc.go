@@ -28,7 +28,7 @@ func handleGRPCServer(ctx context.Context, u *url.URL, chatEndpoints *chat.Endpo
 		chatServer *chatsvr.Server
 	)
 	{
-		chatServer = chatsvr.New(chatEndpoints, nil)
+		chatServer = chatsvr.New(chatEndpoints, nil, nil)
 	}
 
 	// Create interceptor which sets up the logger in each request context.
@@ -37,9 +37,13 @@ func handleGRPCServer(ctx context.Context, u *url.URL, chatEndpoints *chat.Endpo
 		// Log request and response content if debug logs are enabled.
 		chain = grpc.ChainUnaryInterceptor(log.UnaryServerInterceptor(ctx), debug.UnaryServerInterceptor())
 	}
+	streamchain := grpc.ChainStreamInterceptor(log.StreamServerInterceptor(ctx))
+	if dbg {
+		streamchain = grpc.ChainStreamInterceptor(log.StreamServerInterceptor(ctx), debug.StreamServerInterceptor())
+	}
 
 	// Initialize gRPC server
-	srv := grpc.NewServer(chain)
+	srv := grpc.NewServer(chain, streamchain)
 
 	// Register the servers.
 	chatpb.RegisterChatServer(srv, chatServer)

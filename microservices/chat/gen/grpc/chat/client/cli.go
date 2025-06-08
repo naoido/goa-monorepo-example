@@ -6,3 +6,66 @@
 // $ goa gen goa-example/microservices/chat/design
 
 package client
+
+import (
+	"encoding/json"
+	"fmt"
+	chat "goa-example/microservices/chat/gen/chat"
+	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
+)
+
+// BuildCreateRoomPayload builds the payload for the chat create-room endpoint
+// from CLI flags.
+func BuildCreateRoomPayload(chatCreateRoomToken string) (*chat.CreateRoomPayload, error) {
+	var token string
+	{
+		token = chatCreateRoomToken
+	}
+	v := &chat.CreateRoomPayload{}
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildHistoryPayload builds the payload for the chat history endpoint from
+// CLI flags.
+func BuildHistoryPayload(chatHistoryMessage string, chatHistoryToken string) (*chat.HistoryPayload, error) {
+	var err error
+	var message chatpb.HistoryRequest
+	{
+		if chatHistoryMessage != "" {
+			err = json.Unmarshal([]byte(chatHistoryMessage), &message)
+			if err != nil {
+				return nil, fmt.Errorf("invalid JSON for message, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"room_id\": \"Sunt cumque laudantium.\"\n   }'")
+			}
+		}
+	}
+	var token string
+	{
+		token = chatHistoryToken
+	}
+	v := &chat.HistoryPayload{
+		RoomID: message.RoomId,
+	}
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildStreamRoomPayload builds the payload for the chat stream-room endpoint
+// from CLI flags.
+func BuildStreamRoomPayload(chatStreamRoomToken string, chatStreamRoomRoomID string) (*chat.StreamRoomPayload, error) {
+	var token string
+	{
+		token = chatStreamRoomToken
+	}
+	var roomID string
+	{
+		roomID = chatStreamRoomRoomID
+	}
+	v := &chat.StreamRoomPayload{}
+	v.Token = token
+	v.RoomID = roomID
+
+	return v, nil
+}

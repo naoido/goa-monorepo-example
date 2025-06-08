@@ -8,13 +8,81 @@
 package server
 
 import (
+	chat "goa-example/microservices/chat/gen/chat"
 	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
 )
 
-// NewProtoCreatRoomResponse builds the gRPC response type from the result of
-// the "creat-room" endpoint of the "chat" service.
-func NewProtoCreatRoomResponse(result string) *chatpb.CreatRoomResponse {
-	message := &chatpb.CreatRoomResponse{}
+// NewCreateRoomPayload builds the payload of the "create-room" endpoint of the
+// "chat" service from the gRPC request type.
+func NewCreateRoomPayload(token string) *chat.CreateRoomPayload {
+	v := &chat.CreateRoomPayload{}
+	v.Token = token
+	return v
+}
+
+// NewProtoCreateRoomResponse builds the gRPC response type from the result of
+// the "create-room" endpoint of the "chat" service.
+func NewProtoCreateRoomResponse(result string) *chatpb.CreateRoomResponse {
+	message := &chatpb.CreateRoomResponse{}
 	message.Field = result
 	return message
+}
+
+// NewHistoryPayload builds the payload of the "history" endpoint of the "chat"
+// service from the gRPC request type.
+func NewHistoryPayload(message *chatpb.HistoryRequest, token string) *chat.HistoryPayload {
+	v := &chat.HistoryPayload{
+		RoomID: message.RoomId,
+	}
+	v.Token = token
+	return v
+}
+
+// NewProtoHistoryResponse builds the gRPC response type from the result of the
+// "history" endpoint of the "chat" service.
+func NewProtoHistoryResponse(result []*chat.Chat) *chatpb.HistoryResponse {
+	message := &chatpb.HistoryResponse{}
+	message.Field = make([]*chatpb.Chat2, len(result))
+	for i, val := range result {
+		message.Field[i] = &chatpb.Chat2{
+			Username: val.Username,
+			Message_: val.Message,
+			SentAt:   val.SentAt,
+		}
+	}
+	return message
+}
+
+// NewStreamRoomPayload builds the payload of the "stream-room" endpoint of the
+// "chat" service from the gRPC request type.
+func NewStreamRoomPayload(token string, roomID string) *chat.StreamRoomPayload {
+	v := &chat.StreamRoomPayload{}
+	v.Token = token
+	v.RoomID = roomID
+	return v
+}
+
+// NewProtoStreamRoomResponse builds the gRPC response type from the result of
+// the "stream-room" endpoint of the "chat" service.
+func NewProtoStreamRoomResponse(result *chat.Chat) *chatpb.StreamRoomResponse {
+	message := &chatpb.StreamRoomResponse{
+		Username: result.Username,
+		Message_: result.Message,
+		SentAt:   result.SentAt,
+	}
+	return message
+}
+
+func NewProtoChat2StreamRoomResponse(result *chat.Chat) *chatpb.StreamRoomResponse {
+	v := &chatpb.StreamRoomResponse{
+		Username: result.Username,
+		Message_: result.Message,
+		SentAt:   result.SentAt,
+	}
+	return v
+}
+
+func NewStreamRoomStreamingRequestStreamRoomStreamingRequest(v *chatpb.StreamRoomStreamingRequest) string {
+	spayload := v.Field
+	return spayload
 }

@@ -1,6 +1,10 @@
 version: '3.9'
 
 services:
+  # サンプルなので1つのredis使い回します
+  redis:
+    image: "redis:latest"
+
   auth:
     build:
       context: .
@@ -9,7 +13,7 @@ services:
         SERVICE_NAME: auth
     image: goa-microservice/auth-service:latest
     ports:
-      - "8090:8090"
+      - "8090:8080"
     environment:
       - JWT_SECRET=secret
     restart: unless-stopped
@@ -21,7 +25,19 @@ services:
       args:
         SERVICE_NAME: greet
     ports:
-      - "8091:8090"
+      - "8091:8080"
+    environment:
+      - JWT_SECRET=secret
+    restart: unless-stopped
+
+  chat:
+    build:
+      context: .
+      dockerfile: build/Dockerfile
+      args:
+        SERVICE_NAME: chat
+    ports:
+      - "8092:8080"
     environment:
       - JWT_SECRET=secret
     restart: unless-stopped

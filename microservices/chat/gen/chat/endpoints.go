@@ -11,29 +11,96 @@ import (
 	"context"
 
 	goa "goa.design/goa/v3/pkg"
+	"goa.design/goa/v3/security"
 )
 
 // Endpoints wraps the "chat" service endpoints.
 type Endpoints struct {
-	CreatRoom goa.Endpoint
+	CreateRoom goa.Endpoint
+	History    goa.Endpoint
+	StreamRoom goa.Endpoint
+}
+
+// StreamRoomEndpointInput holds both the payload and the server stream of the
+// "stream-room" method.
+type StreamRoomEndpointInput struct {
+	// Payload is the method payload.
+	Payload *StreamRoomPayload
+	// Stream is the server stream used by the "stream-room" method to send data.
+	Stream StreamRoomServerStream
 }
 
 // NewEndpoints wraps the methods of the "chat" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
+	// Casting service to Auther interface
+	a := s.(Auther)
 	return &Endpoints{
-		CreatRoom: NewCreatRoomEndpoint(s),
+		CreateRoom: NewCreateRoomEndpoint(s, a.JWTAuth),
+		History:    NewHistoryEndpoint(s, a.JWTAuth),
+		StreamRoom: NewStreamRoomEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "chat" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.CreatRoom = m(e.CreatRoom)
+	e.CreateRoom = m(e.CreateRoom)
+	e.History = m(e.History)
+	e.StreamRoom = m(e.StreamRoom)
 }
 
-// NewCreatRoomEndpoint returns an endpoint function that calls the method
-// "creat-room" of service "chat".
-func NewCreatRoomEndpoint(s Service) goa.Endpoint {
+// NewCreateRoomEndpoint returns an endpoint function that calls the method
+// "create-room" of service "chat".
+func NewCreateRoomEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.CreatRoom(ctx)
+		p := req.(*CreateRoomPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"api:read", "api:write", "api:admin"},
+			RequiredScopes: []string{"api:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.Token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.CreateRoom(ctx, p)
+	}
+}
+
+// NewHistoryEndpoint returns an endpoint function that calls the method
+// "history" of service "chat".
+func NewHistoryEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*HistoryPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"api:read", "api:write", "api:admin"},
+			RequiredScopes: []string{"api:read"},
+		}
+		ctx, err = authJWTFn(ctx, p.Token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.History(ctx, p)
+	}
+}
+
+// NewStreamRoomEndpoint returns an endpoint function that calls the method
+// "stream-room" of service "chat".
+func NewStreamRoomEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		ep := req.(*StreamRoomEndpointInput)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"api:read", "api:write", "api:admin"},
+			RequiredScopes: []string{"api:read"},
+		}
+		ctx, err = authJWTFn(ctx, ep.Payload.Token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.StreamRoom(ctx, ep.Payload, ep.Stream)
 	}
 }

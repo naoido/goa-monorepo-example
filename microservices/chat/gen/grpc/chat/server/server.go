@@ -9,42 +9,171 @@ package server
 
 import (
 	"context"
+	"errors"
 	chat "goa-example/microservices/chat/gen/chat"
 	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
 
 	goagrpc "goa.design/goa/v3/grpc"
 	goa "goa.design/goa/v3/pkg"
+	"google.golang.org/grpc/codes"
 )
 
 // Server implements the chatpb.ChatServer interface.
 type Server struct {
-	CreatRoomH goagrpc.UnaryHandler
+	CreateRoomH goagrpc.UnaryHandler
+	HistoryH    goagrpc.UnaryHandler
+	StreamRoomH goagrpc.StreamHandler
 	chatpb.UnimplementedChatServer
 }
 
+// StreamRoomServerStream implements the chat.StreamRoomServerStream interface.
+type StreamRoomServerStream struct {
+	stream chatpb.Chat_StreamRoomServer
+}
+
 // New instantiates the server struct with the chat service endpoints.
-func New(e *chat.Endpoints, uh goagrpc.UnaryHandler) *Server {
+func New(e *chat.Endpoints, uh goagrpc.UnaryHandler, sh goagrpc.StreamHandler) *Server {
 	return &Server{
-		CreatRoomH: NewCreatRoomHandler(e.CreatRoom, uh),
+		CreateRoomH: NewCreateRoomHandler(e.CreateRoom, uh),
+		HistoryH:    NewHistoryHandler(e.History, uh),
+		StreamRoomH: NewStreamRoomHandler(e.StreamRoom, sh),
 	}
 }
 
-// NewCreatRoomHandler creates a gRPC handler which serves the "chat" service
-// "creat-room" endpoint.
-func NewCreatRoomHandler(endpoint goa.Endpoint, h goagrpc.UnaryHandler) goagrpc.UnaryHandler {
+// NewCreateRoomHandler creates a gRPC handler which serves the "chat" service
+// "create-room" endpoint.
+func NewCreateRoomHandler(endpoint goa.Endpoint, h goagrpc.UnaryHandler) goagrpc.UnaryHandler {
 	if h == nil {
-		h = goagrpc.NewUnaryHandler(endpoint, nil, EncodeCreatRoomResponse)
+		h = goagrpc.NewUnaryHandler(endpoint, DecodeCreateRoomRequest, EncodeCreateRoomResponse)
 	}
 	return h
 }
 
-// CreatRoom implements the "CreatRoom" method in chatpb.ChatServer interface.
-func (s *Server) CreatRoom(ctx context.Context, message *chatpb.CreatRoomRequest) (*chatpb.CreatRoomResponse, error) {
-	ctx = context.WithValue(ctx, goa.MethodKey, "creat-room")
+// CreateRoom implements the "CreateRoom" method in chatpb.ChatServer interface.
+func (s *Server) CreateRoom(ctx context.Context, message *chatpb.CreateRoomRequest) (*chatpb.CreateRoomResponse, error) {
+	ctx = context.WithValue(ctx, goa.MethodKey, "create-room")
 	ctx = context.WithValue(ctx, goa.ServiceKey, "chat")
-	resp, err := s.CreatRoomH.Handle(ctx, message)
+	resp, err := s.CreateRoomH.Handle(ctx, message)
 	if err != nil {
+		var en goa.GoaErrorNamer
+		if errors.As(err, &en) {
+			switch en.GoaErrorName() {
+			case "internal":
+				return nil, goagrpc.NewStatusError(codes.InvalidArgument, err, goagrpc.NewErrorResponse(err))
+			}
+		}
 		return nil, goagrpc.EncodeError(err)
 	}
-	return resp.(*chatpb.CreatRoomResponse), nil
+	return resp.(*chatpb.CreateRoomResponse), nil
+}
+
+// NewHistoryHandler creates a gRPC handler which serves the "chat" service
+// "history" endpoint.
+func NewHistoryHandler(endpoint goa.Endpoint, h goagrpc.UnaryHandler) goagrpc.UnaryHandler {
+	if h == nil {
+		h = goagrpc.NewUnaryHandler(endpoint, DecodeHistoryRequest, EncodeHistoryResponse)
+	}
+	return h
+}
+
+// History implements the "History" method in chatpb.ChatServer interface.
+func (s *Server) History(ctx context.Context, message *chatpb.HistoryRequest) (*chatpb.HistoryResponse, error) {
+	ctx = context.WithValue(ctx, goa.MethodKey, "history")
+	ctx = context.WithValue(ctx, goa.ServiceKey, "chat")
+	resp, err := s.HistoryH.Handle(ctx, message)
+	if err != nil {
+		var en goa.GoaErrorNamer
+		if errors.As(err, &en) {
+			switch en.GoaErrorName() {
+			case "unauthorized":
+				return nil, goagrpc.NewStatusError(codes.InvalidArgument, err, goagrpc.NewErrorResponse(err))
+			case "permission-denied":
+				return nil, goagrpc.NewStatusError(codes.PermissionDenied, err, goagrpc.NewErrorResponse(err))
+			}
+		}
+		return nil, goagrpc.EncodeError(err)
+	}
+	return resp.(*chatpb.HistoryResponse), nil
+}
+
+// NewStreamRoomHandler creates a gRPC handler which serves the "chat" service
+// "stream-room" endpoint.
+func NewStreamRoomHandler(endpoint goa.Endpoint, h goagrpc.StreamHandler) goagrpc.StreamHandler {
+	if h == nil {
+		h = goagrpc.NewStreamHandler(endpoint, DecodeStreamRoomRequest)
+	}
+	return h
+}
+
+// StreamRoom implements the "StreamRoom" method in chatpb.ChatServer interface.
+func (s *Server) StreamRoom(stream chatpb.Chat_StreamRoomServer) error {
+	ctx := stream.Context()
+	ctx = context.WithValue(ctx, goa.MethodKey, "stream-room")
+	ctx = context.WithValue(ctx, goa.ServiceKey, "chat")
+	p, err := s.StreamRoomH.Decode(ctx, nil)
+	if err != nil {
+		var en goa.GoaErrorNamer
+		if errors.As(err, &en) {
+			switch en.GoaErrorName() {
+			case "unauthorized":
+				return goagrpc.NewStatusError(codes.InvalidArgument, err, goagrpc.NewErrorResponse(err))
+			case "permission-denied":
+				return goagrpc.NewStatusError(codes.PermissionDenied, err, goagrpc.NewErrorResponse(err))
+			}
+		}
+		return goagrpc.EncodeError(err)
+	}
+	ep := &chat.StreamRoomEndpointInput{
+		Stream:  &StreamRoomServerStream{stream: stream},
+		Payload: p.(*chat.StreamRoomPayload),
+	}
+	err = s.StreamRoomH.Handle(ctx, ep)
+	if err != nil {
+		var en goa.GoaErrorNamer
+		if errors.As(err, &en) {
+			switch en.GoaErrorName() {
+			case "unauthorized":
+				return goagrpc.NewStatusError(codes.InvalidArgument, err, goagrpc.NewErrorResponse(err))
+			case "permission-denied":
+				return goagrpc.NewStatusError(codes.PermissionDenied, err, goagrpc.NewErrorResponse(err))
+			}
+		}
+		return goagrpc.EncodeError(err)
+	}
+	return nil
+}
+
+// Send streams instances of "chatpb.StreamRoomResponse" to the "stream-room"
+// endpoint gRPC stream.
+func (s *StreamRoomServerStream) Send(res *chat.Chat) error {
+	v := NewProtoChat2StreamRoomResponse(res)
+	return s.stream.Send(v)
+}
+
+// SendWithContext streams instances of "chatpb.StreamRoomResponse" to the
+// "stream-room" endpoint gRPC stream with context.
+func (s *StreamRoomServerStream) SendWithContext(ctx context.Context, res *chat.Chat) error {
+	return s.Send(res)
+}
+
+// Recv reads instances of "chatpb.StreamRoomStreamingRequest" from the
+// "stream-room" endpoint gRPC stream.
+func (s *StreamRoomServerStream) Recv() (string, error) {
+	var res string
+	v, err := s.stream.Recv()
+	if err != nil {
+		return res, err
+	}
+	return NewStreamRoomStreamingRequestStreamRoomStreamingRequest(v), nil
+}
+
+// RecvWithContext reads instances of "chatpb.StreamRoomStreamingRequest" from
+// the "stream-room" endpoint gRPC stream with context.
+func (s *StreamRoomServerStream) RecvWithContext(ctx context.Context) (string, error) {
+	return s.Recv()
+}
+
+func (s *StreamRoomServerStream) Close() error {
+	// nothing to do here
+	return nil
 }

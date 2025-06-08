@@ -14,12 +14,47 @@ option go_package = "/chat.v1pb";
 // The chat service invokes the chat.
 service Chat {
 	// Creates a new chat room.
-	rpc CreatRoom (CreatRoomRequest) returns (CreatRoomResponse);
+	rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse);
+	// Get all chat rooms history.
+	rpc History (HistoryRequest) returns (HistoryResponse);
+	// Streams chat room events on a chat room.
+	rpc StreamRoom (stream StreamRoomStreamingRequest) returns (stream StreamRoomResponse);
 }
 
-message CreatRoomRequest {
+message CreateRoomRequest {
 }
 
-message CreatRoomResponse {
+message CreateRoomResponse {
 	string field = 1;
+}
+
+message HistoryRequest {
+	// The id of the room
+	string room_id = 1;
+}
+
+message HistoryResponse {
+	repeated Chat2 field = 1;
+}
+// Chat
+message Chat2 {
+	// username
+	string username = 1;
+	// message
+	string message_ = 2;
+	// sent_at
+	sint64 sent_at = 3;
+}
+
+message StreamRoomStreamingRequest {
+	string field = 1;
+}
+
+message StreamRoomResponse {
+	// username
+	string username = 1;
+	// message
+	string message_ = 2;
+	// sent_at
+	sint64 sent_at = 3;
 }

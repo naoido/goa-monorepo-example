@@ -9,6 +9,7 @@ package client
 
 import (
 	"context"
+	chat "goa-example/microservices/chat/gen/chat"
 	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
 
 	goagrpc "goa.design/goa/v3/grpc"
@@ -16,26 +17,104 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// BuildCreatRoomFunc builds the remote method to invoke for "chat" service
-// "creat-room" endpoint.
-func BuildCreatRoomFunc(grpccli chatpb.ChatClient, cliopts ...grpc.CallOption) goagrpc.RemoteFunc {
+// BuildCreateRoomFunc builds the remote method to invoke for "chat" service
+// "create-room" endpoint.
+func BuildCreateRoomFunc(grpccli chatpb.ChatClient, cliopts ...grpc.CallOption) goagrpc.RemoteFunc {
 	return func(ctx context.Context, reqpb any, opts ...grpc.CallOption) (any, error) {
 		for _, opt := range cliopts {
 			opts = append(opts, opt)
 		}
 		if reqpb != nil {
-			return grpccli.CreatRoom(ctx, reqpb.(*chatpb.CreatRoomRequest), opts...)
+			return grpccli.CreateRoom(ctx, reqpb.(*chatpb.CreateRoomRequest), opts...)
 		}
-		return grpccli.CreatRoom(ctx, &chatpb.CreatRoomRequest{}, opts...)
+		return grpccli.CreateRoom(ctx, &chatpb.CreateRoomRequest{}, opts...)
 	}
 }
 
-// DecodeCreatRoomResponse decodes responses from the chat creat-room endpoint.
-func DecodeCreatRoomResponse(ctx context.Context, v any, hdr, trlr metadata.MD) (any, error) {
-	message, ok := v.(*chatpb.CreatRoomResponse)
+// EncodeCreateRoomRequest encodes requests sent to chat create-room endpoint.
+func EncodeCreateRoomRequest(ctx context.Context, v any, md *metadata.MD) (any, error) {
+	payload, ok := v.(*chat.CreateRoomPayload)
 	if !ok {
-		return nil, goagrpc.ErrInvalidType("chat", "creat-room", "*chatpb.CreatRoomResponse", v)
+		return nil, goagrpc.ErrInvalidType("chat", "create-room", "*chat.CreateRoomPayload", v)
 	}
-	res := NewCreatRoomResult(message)
+	(*md).Append("authorization", payload.Token)
+	return NewProtoCreateRoomRequest(), nil
+}
+
+// DecodeCreateRoomResponse decodes responses from the chat create-room
+// endpoint.
+func DecodeCreateRoomResponse(ctx context.Context, v any, hdr, trlr metadata.MD) (any, error) {
+	message, ok := v.(*chatpb.CreateRoomResponse)
+	if !ok {
+		return nil, goagrpc.ErrInvalidType("chat", "create-room", "*chatpb.CreateRoomResponse", v)
+	}
+	res := NewCreateRoomResult(message)
 	return res, nil
+}
+
+// BuildHistoryFunc builds the remote method to invoke for "chat" service
+// "history" endpoint.
+func BuildHistoryFunc(grpccli chatpb.ChatClient, cliopts ...grpc.CallOption) goagrpc.RemoteFunc {
+	return func(ctx context.Context, reqpb any, opts ...grpc.CallOption) (any, error) {
+		for _, opt := range cliopts {
+			opts = append(opts, opt)
+		}
+		if reqpb != nil {
+			return grpccli.History(ctx, reqpb.(*chatpb.HistoryRequest), opts...)
+		}
+		return grpccli.History(ctx, &chatpb.HistoryRequest{}, opts...)
+	}
+}
+
+// EncodeHistoryRequest encodes requests sent to chat history endpoint.
+func EncodeHistoryRequest(ctx context.Context, v any, md *metadata.MD) (any, error) {
+	payload, ok := v.(*chat.HistoryPayload)
+	if !ok {
+		return nil, goagrpc.ErrInvalidType("chat", "history", "*chat.HistoryPayload", v)
+	}
+	(*md).Append("authorization", payload.Token)
+	return NewProtoHistoryRequest(payload), nil
+}
+
+// DecodeHistoryResponse decodes responses from the chat history endpoint.
+func DecodeHistoryResponse(ctx context.Context, v any, hdr, trlr metadata.MD) (any, error) {
+	message, ok := v.(*chatpb.HistoryResponse)
+	if !ok {
+		return nil, goagrpc.ErrInvalidType("chat", "history", "*chatpb.HistoryResponse", v)
+	}
+	res := NewHistoryResult(message)
+	return res, nil
+}
+
+// BuildStreamRoomFunc builds the remote method to invoke for "chat" service
+// "stream-room" endpoint.
+func BuildStreamRoomFunc(grpccli chatpb.ChatClient, cliopts ...grpc.CallOption) goagrpc.RemoteFunc {
+	return func(ctx context.Context, reqpb any, opts ...grpc.CallOption) (any, error) {
+		for _, opt := range cliopts {
+			opts = append(opts, opt)
+		}
+		if reqpb != nil {
+			return grpccli.StreamRoom(ctx, opts...)
+		}
+		return grpccli.StreamRoom(ctx, opts...)
+	}
+}
+
+// EncodeStreamRoomRequest encodes requests sent to chat stream-room endpoint.
+func EncodeStreamRoomRequest(ctx context.Context, v any, md *metadata.MD) (any, error) {
+	payload, ok := v.(*chat.StreamRoomPayload)
+	if !ok {
+		return nil, goagrpc.ErrInvalidType("chat", "stream-room", "*chat.StreamRoomPayload", v)
+	}
+	(*md).Append("authorization", payload.Token)
+	(*md).Append("room_id", payload.RoomID)
+	return nil, nil
+}
+
+// DecodeStreamRoomResponse decodes responses from the chat stream-room
+// endpoint.
+func DecodeStreamRoomResponse(ctx context.Context, v any, hdr, trlr metadata.MD) (any, error) {
+	return &StreamRoomClientStream{
+		stream: v.(chatpb.Chat_StreamRoomClient),
+	}, nil
 }

@@ -15,22 +15,61 @@ import (
 
 // Client is the "chat" service client.
 type Client struct {
-	CreatRoomEndpoint goa.Endpoint
+	CreateRoomEndpoint goa.Endpoint
+	HistoryEndpoint    goa.Endpoint
+	StreamRoomEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "chat" service client given the endpoints.
-func NewClient(creatRoom goa.Endpoint) *Client {
+func NewClient(createRoom, history, streamRoom goa.Endpoint) *Client {
 	return &Client{
-		CreatRoomEndpoint: creatRoom,
+		CreateRoomEndpoint: createRoom,
+		HistoryEndpoint:    history,
+		StreamRoomEndpoint: streamRoom,
 	}
 }
 
-// CreatRoom calls the "creat-room" endpoint of the "chat" service.
-func (c *Client) CreatRoom(ctx context.Context) (res string, err error) {
+// CreateRoom calls the "create-room" endpoint of the "chat" service.
+// CreateRoom may return the following errors:
+//   - "unauthorized" (type Unauthorized)
+//   - "permission-denied" (type PermissionDenied)
+//   - "internal" (type Internal)
+//   - error: internal error
+func (c *Client) CreateRoom(ctx context.Context, p *CreateRoomPayload) (res string, err error) {
 	var ires any
-	ires, err = c.CreatRoomEndpoint(ctx, nil)
+	ires, err = c.CreateRoomEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
 	return ires.(string), nil
+}
+
+// History calls the "history" endpoint of the "chat" service.
+// History may return the following errors:
+//   - "unauthorized" (type Unauthorized)
+//   - "permission-denied" (type PermissionDenied)
+//   - "internal" (type Internal)
+//   - error: internal error
+func (c *Client) History(ctx context.Context, p *HistoryPayload) (res []*Chat, err error) {
+	var ires any
+	ires, err = c.HistoryEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.([]*Chat), nil
+}
+
+// StreamRoom calls the "stream-room" endpoint of the "chat" service.
+// StreamRoom may return the following errors:
+//   - "unauthorized" (type Unauthorized)
+//   - "permission-denied" (type PermissionDenied)
+//   - "internal" (type Internal)
+//   - error: internal error
+func (c *Client) StreamRoom(ctx context.Context, p *StreamRoomPayload) (res StreamRoomClientStream, err error) {
+	var ires any
+	ires, err = c.StreamRoomEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(StreamRoomClientStream), nil
 }

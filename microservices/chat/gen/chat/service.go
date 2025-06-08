@@ -9,12 +9,24 @@ package chat
 
 import (
 	"context"
+
+	"goa.design/goa/v3/security"
 )
 
 // The chat service invokes the chat.
 type Service interface {
 	// Creates a new chat room.
-	CreatRoom(context.Context) (res string, err error)
+	CreateRoom(context.Context, *CreateRoomPayload) (res string, err error)
+	// Get all chat rooms history.
+	History(context.Context, *HistoryPayload) (res []*Chat, err error)
+	// Streams chat room events on a chat room.
+	StreamRoom(context.Context, *StreamRoomPayload, StreamRoomServerStream) (err error)
+}
+
+// Auther defines the authorization functions to be implemented by the service.
+type Auther interface {
+	// JWTAuth implements the authorization logic for the JWT security scheme.
+	JWTAuth(ctx context.Context, token string, schema *security.JWTScheme) (context.Context, error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -31,4 +43,123 @@ const ServiceName = "chat"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"creat-room"}
+var MethodNames = [3]string{"create-room", "history", "stream-room"}
+
+// StreamRoomServerStream is the interface a "stream-room" endpoint server
+// stream must satisfy.
+type StreamRoomServerStream interface {
+	// Send streams instances of "Chat".
+	Send(*Chat) error
+	// SendWithContext streams instances of "Chat" with context.
+	SendWithContext(context.Context, *Chat) error
+	// Recv reads instances of "string" from the stream.
+	Recv() (string, error)
+	// RecvWithContext reads instances of "string" from the stream with context.
+	RecvWithContext(context.Context) (string, error)
+	// Close closes the stream.
+	Close() error
+}
+
+// StreamRoomClientStream is the interface a "stream-room" endpoint client
+// stream must satisfy.
+type StreamRoomClientStream interface {
+	// Send streams instances of "string".
+	Send(string) error
+	// SendWithContext streams instances of "string" with context.
+	SendWithContext(context.Context, string) error
+	// Recv reads instances of "Chat" from the stream.
+	Recv() (*Chat, error)
+	// RecvWithContext reads instances of "Chat" from the stream with context.
+	RecvWithContext(context.Context) (*Chat, error)
+	// Close closes the stream.
+	Close() error
+}
+
+// Chat is the result type of the chat service stream-room method.
+type Chat struct {
+	// username
+	Username string
+	// message
+	Message string
+	// sent_at
+	SentAt int64
+}
+
+// CreateRoomPayload is the payload type of the chat service create-room method.
+type CreateRoomPayload struct {
+	// The access token
+	Token string
+}
+
+// HistoryPayload is the payload type of the chat service history method.
+type HistoryPayload struct {
+	// The access token
+	Token string
+	// The id of the room
+	RoomID string
+}
+
+// StreamRoomPayload is the payload type of the chat service stream-room method.
+type StreamRoomPayload struct {
+	// The access token
+	Token string
+	// The room id
+	RoomID string
+}
+
+type Internal string
+
+type PermissionDenied string
+
+type Unauthorized string
+
+// Error returns an error description.
+func (e Internal) Error() string {
+	return ""
+}
+
+// ErrorName returns "internal".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e Internal) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "internal".
+func (e Internal) GoaErrorName() string {
+	return "internal"
+}
+
+// Error returns an error description.
+func (e PermissionDenied) Error() string {
+	return ""
+}
+
+// ErrorName returns "permission-denied".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e PermissionDenied) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "permission-denied".
+func (e PermissionDenied) GoaErrorName() string {
+	return "permission-denied"
+}
+
+// Error returns an error description.
+func (e Unauthorized) Error() string {
+	return ""
+}
+
+// ErrorName returns "unauthorized".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e Unauthorized) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "unauthorized".
+func (e Unauthorized) GoaErrorName() string {
+	return "unauthorized"
+}

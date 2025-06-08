@@ -9,9 +9,11 @@ package client
 
 import (
 	"context"
+	chat "goa-example/microservices/chat/gen/chat"
 	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
 
 	goagrpc "goa.design/goa/v3/grpc"
+	goapb "goa.design/goa/v3/grpc/pb"
 	goa "goa.design/goa/v3/pkg"
 	"google.golang.org/grpc"
 )
@@ -22,6 +24,11 @@ type Client struct {
 	opts    []grpc.CallOption
 }
 
+// StreamRoomClientStream implements the chat.StreamRoomClientStream interface.
+type StreamRoomClientStream struct {
+	stream chatpb.Chat_StreamRoomClient
+}
+
 // NewClient instantiates gRPC client for all the chat service servers.
 func NewClient(cc *grpc.ClientConn, opts ...grpc.CallOption) *Client {
 	return &Client{
@@ -30,17 +37,100 @@ func NewClient(cc *grpc.ClientConn, opts ...grpc.CallOption) *Client {
 	}
 }
 
-// CreatRoom calls the "CreatRoom" function in chatpb.ChatClient interface.
-func (c *Client) CreatRoom() goa.Endpoint {
+// CreateRoom calls the "CreateRoom" function in chatpb.ChatClient interface.
+func (c *Client) CreateRoom() goa.Endpoint {
 	return func(ctx context.Context, v any) (any, error) {
 		inv := goagrpc.NewInvoker(
-			BuildCreatRoomFunc(c.grpccli, c.opts...),
-			nil,
-			DecodeCreatRoomResponse)
+			BuildCreateRoomFunc(c.grpccli, c.opts...),
+			EncodeCreateRoomRequest,
+			DecodeCreateRoomResponse)
 		res, err := inv.Invoke(ctx, v)
 		if err != nil {
-			return nil, goa.Fault("%s", err.Error())
+			resp := goagrpc.DecodeError(err)
+			switch message := resp.(type) {
+			case *goapb.ErrorResponse:
+				return nil, goagrpc.NewServiceError(message)
+			default:
+				return nil, goa.Fault("%s", err.Error())
+			}
 		}
 		return res, nil
 	}
+}
+
+// History calls the "History" function in chatpb.ChatClient interface.
+func (c *Client) History() goa.Endpoint {
+	return func(ctx context.Context, v any) (any, error) {
+		inv := goagrpc.NewInvoker(
+			BuildHistoryFunc(c.grpccli, c.opts...),
+			EncodeHistoryRequest,
+			DecodeHistoryResponse)
+		res, err := inv.Invoke(ctx, v)
+		if err != nil {
+			resp := goagrpc.DecodeError(err)
+			switch message := resp.(type) {
+			case *goapb.ErrorResponse:
+				return nil, goagrpc.NewServiceError(message)
+			default:
+				return nil, goa.Fault("%s", err.Error())
+			}
+		}
+		return res, nil
+	}
+}
+
+// StreamRoom calls the "StreamRoom" function in chatpb.ChatClient interface.
+func (c *Client) StreamRoom() goa.Endpoint {
+	return func(ctx context.Context, v any) (any, error) {
+		inv := goagrpc.NewInvoker(
+			BuildStreamRoomFunc(c.grpccli, c.opts...),
+			EncodeStreamRoomRequest,
+			DecodeStreamRoomResponse)
+		res, err := inv.Invoke(ctx, v)
+		if err != nil {
+			resp := goagrpc.DecodeError(err)
+			switch message := resp.(type) {
+			case *goapb.ErrorResponse:
+				return nil, goagrpc.NewServiceError(message)
+			default:
+				return nil, goa.Fault("%s", err.Error())
+			}
+		}
+		return res, nil
+	}
+}
+
+// Recv reads instances of "chatpb.StreamRoomResponse" from the "stream-room"
+// endpoint gRPC stream.
+func (s *StreamRoomClientStream) Recv() (*chat.Chat, error) {
+	var res *chat.Chat
+	v, err := s.stream.Recv()
+	if err != nil {
+		return res, err
+	}
+	return NewStreamRoomResponseChat2(v), nil
+}
+
+// RecvWithContext reads instances of "chatpb.StreamRoomResponse" from the
+// "stream-room" endpoint gRPC stream with context.
+func (s *StreamRoomClientStream) RecvWithContext(ctx context.Context) (*chat.Chat, error) {
+	return s.Recv()
+}
+
+// Send streams instances of "chatpb.StreamRoomStreamingRequest" to the
+// "stream-room" endpoint gRPC stream.
+func (s *StreamRoomClientStream) Send(res string) error {
+	v := NewProtoStreamRoomStreamingRequest(res)
+	return s.stream.Send(v)
+}
+
+// SendWithContext streams instances of "chatpb.StreamRoomStreamingRequest" to
+// the "stream-room" endpoint gRPC stream with context.
+func (s *StreamRoomClientStream) SendWithContext(ctx context.Context, res string) error {
+	return s.Send(res)
+}
+
+func (s *StreamRoomClientStream) Close() error {
+	// Close the send direction of the stream
+	return s.stream.CloseSend()
 }

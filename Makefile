@@ -1,11 +1,15 @@
-gen-auth:
-	cd microservices/auth && goa gen goa-example/microservices/auth/design
+DIRS := $(wildcard microservices/*/)
+TARGETS := $(notdir $(patsubst %/,%,$(DIRS)))
 
-gen-greet:
-	cd microservices/greet && goa gen goa-example/microservices/greet/design
+.PHONY: $(TARGETS) $(addprefix run-, $(TARGETS)) $(addprefix gen-, $(TARGETS))
+$(addprefix gen-, $(TARGETS)): gen-%:
+	@echo "Running goa gen: $*"
+	cd microservices/$* && goa gen goa-example/microservices/$*/design
 
-run-auth:
-	cd microservices/auth && export JWT_SECRET=secret && go build -o auth ./cmd/auth && ./auth
+$(addprefix example-, $(TARGETS)): example-%:
+	@echo "Running goa gen: $*"
+	cd microservices/$* && goa example goa-example/microservices/$*/design
 
-run-greet:
-	cd microservices/greet && export JWT_SECRET=secret && go build -o greet ./cmd/greet && ./greet
+$(addprefix run-, $(TARGETS)): run-%:
+	@echo "Running server: $*"
+	cd microservices/$* && export JWT_SECRET=secret && go build -o server ./cmd/$* && ./server

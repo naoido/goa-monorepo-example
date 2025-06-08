@@ -21,13 +21,13 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `chat creat-room
+	return `chat (create-room|history|stream-room)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` chat creat-room` + "\n" +
+	return os.Args[0] + ` chat create-room --token "Sequi occaecati facere error id."` + "\n" +
 		""
 }
 
@@ -40,10 +40,21 @@ func ParseEndpoint(
 	var (
 		chatFlags = flag.NewFlagSet("chat", flag.ContinueOnError)
 
-		chatCreatRoomFlags = flag.NewFlagSet("creat-room", flag.ExitOnError)
+		chatCreateRoomFlags     = flag.NewFlagSet("create-room", flag.ExitOnError)
+		chatCreateRoomTokenFlag = chatCreateRoomFlags.String("token", "REQUIRED", "")
+
+		chatHistoryFlags       = flag.NewFlagSet("history", flag.ExitOnError)
+		chatHistoryMessageFlag = chatHistoryFlags.String("message", "", "")
+		chatHistoryTokenFlag   = chatHistoryFlags.String("token", "REQUIRED", "")
+
+		chatStreamRoomFlags      = flag.NewFlagSet("stream-room", flag.ExitOnError)
+		chatStreamRoomTokenFlag  = chatStreamRoomFlags.String("token", "REQUIRED", "")
+		chatStreamRoomRoomIDFlag = chatStreamRoomFlags.String("room-id", "REQUIRED", "")
 	)
 	chatFlags.Usage = chatUsage
-	chatCreatRoomFlags.Usage = chatCreatRoomUsage
+	chatCreateRoomFlags.Usage = chatCreateRoomUsage
+	chatHistoryFlags.Usage = chatHistoryUsage
+	chatStreamRoomFlags.Usage = chatStreamRoomUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -79,8 +90,14 @@ func ParseEndpoint(
 		switch svcn {
 		case "chat":
 			switch epn {
-			case "creat-room":
-				epf = chatCreatRoomFlags
+			case "create-room":
+				epf = chatCreateRoomFlags
+
+			case "history":
+				epf = chatHistoryFlags
+
+			case "stream-room":
+				epf = chatStreamRoomFlags
 
 			}
 
@@ -107,8 +124,15 @@ func ParseEndpoint(
 		case "chat":
 			c := chatc.NewClient(cc, opts...)
 			switch epn {
-			case "creat-room":
-				endpoint = c.CreatRoom()
+			case "create-room":
+				endpoint = c.CreateRoom()
+				data, err = chatc.BuildCreateRoomPayload(*chatCreateRoomTokenFlag)
+			case "history":
+				endpoint = c.History()
+				data, err = chatc.BuildHistoryPayload(*chatHistoryMessageFlag, *chatHistoryTokenFlag)
+			case "stream-room":
+				endpoint = c.StreamRoom()
+				data, err = chatc.BuildStreamRoomPayload(*chatStreamRoomTokenFlag, *chatStreamRoomRoomIDFlag)
 			}
 		}
 	}
@@ -126,18 +150,47 @@ Usage:
     %[1]s [globalflags] chat COMMAND [flags]
 
 COMMAND:
-    creat-room: Creates a new chat room.
+    create-room: Creates a new chat room.
+    history: Get all chat rooms history.
+    stream-room: Streams chat room events on a chat room.
 
 Additional help:
     %[1]s chat COMMAND --help
 `, os.Args[0])
 }
-func chatCreatRoomUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] chat creat-room
+func chatCreateRoomUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] chat create-room -token STRING
 
 Creates a new chat room.
+    -token STRING: 
 
 Example:
-    %[1]s chat creat-room
+    %[1]s chat create-room --token "Sequi occaecati facere error id."
+`, os.Args[0])
+}
+
+func chatHistoryUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] chat history -message JSON -token STRING
+
+Get all chat rooms history.
+    -message JSON: 
+    -token STRING: 
+
+Example:
+    %[1]s chat history --message '{
+      "room_id": "Sunt cumque laudantium."
+   }' --token "Sequi error dolorum sequi repellendus laborum dignissimos."
+`, os.Args[0])
+}
+
+func chatStreamRoomUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] chat stream-room -token STRING -room-id STRING
+
+Streams chat room events on a chat room.
+    -token STRING: 
+    -room-id STRING: 
+
+Example:
+    %[1]s chat stream-room --token "Quia non non et error impedit." --room-id "Qui voluptatem saepe doloribus sint dignissimos."
 `, os.Args[0])
 }

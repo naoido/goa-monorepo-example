@@ -26,7 +26,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Chat_CreatRoom_FullMethodName = "/chat.v1.Chat/CreatRoom"
+	Chat_CreateRoom_FullMethodName = "/chat.v1.Chat/CreateRoom"
+	Chat_History_FullMethodName    = "/chat.v1.Chat/History"
+	Chat_StreamRoom_FullMethodName = "/chat.v1.Chat/StreamRoom"
 )
 
 // ChatClient is the client API for Chat service.
@@ -36,7 +38,11 @@ const (
 // The chat service invokes the chat.
 type ChatClient interface {
 	// Creates a new chat room.
-	CreatRoom(ctx context.Context, in *CreatRoomRequest, opts ...grpc.CallOption) (*CreatRoomResponse, error)
+	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error)
+	// Get all chat rooms history.
+	History(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error)
+	// Streams chat room events on a chat room.
+	StreamRoom(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamRoomStreamingRequest, StreamRoomResponse], error)
 }
 
 type chatClient struct {
@@ -47,15 +53,38 @@ func NewChatClient(cc grpc.ClientConnInterface) ChatClient {
 	return &chatClient{cc}
 }
 
-func (c *chatClient) CreatRoom(ctx context.Context, in *CreatRoomRequest, opts ...grpc.CallOption) (*CreatRoomResponse, error) {
+func (c *chatClient) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreatRoomResponse)
-	err := c.cc.Invoke(ctx, Chat_CreatRoom_FullMethodName, in, out, cOpts...)
+	out := new(CreateRoomResponse)
+	err := c.cc.Invoke(ctx, Chat_CreateRoom_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
+
+func (c *chatClient) History(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HistoryResponse)
+	err := c.cc.Invoke(ctx, Chat_History_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) StreamRoom(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamRoomStreamingRequest, StreamRoomResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Chat_ServiceDesc.Streams[0], Chat_StreamRoom_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamRoomStreamingRequest, StreamRoomResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Chat_StreamRoomClient = grpc.BidiStreamingClient[StreamRoomStreamingRequest, StreamRoomResponse]
 
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
@@ -64,7 +93,11 @@ func (c *chatClient) CreatRoom(ctx context.Context, in *CreatRoomRequest, opts .
 // The chat service invokes the chat.
 type ChatServer interface {
 	// Creates a new chat room.
-	CreatRoom(context.Context, *CreatRoomRequest) (*CreatRoomResponse, error)
+	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error)
+	// Get all chat rooms history.
+	History(context.Context, *HistoryRequest) (*HistoryResponse, error)
+	// Streams chat room events on a chat room.
+	StreamRoom(grpc.BidiStreamingServer[StreamRoomStreamingRequest, StreamRoomResponse]) error
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -75,8 +108,14 @@ type ChatServer interface {
 // pointer dereference when methods are called.
 type UnimplementedChatServer struct{}
 
-func (UnimplementedChatServer) CreatRoom(context.Context, *CreatRoomRequest) (*CreatRoomResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatRoom not implemented")
+func (UnimplementedChatServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
+}
+func (UnimplementedChatServer) History(context.Context, *HistoryRequest) (*HistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method History not implemented")
+}
+func (UnimplementedChatServer) StreamRoom(grpc.BidiStreamingServer[StreamRoomStreamingRequest, StreamRoomResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamRoom not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 func (UnimplementedChatServer) testEmbeddedByValue()              {}
@@ -99,23 +138,48 @@ func RegisterChatServer(s grpc.ServiceRegistrar, srv ChatServer) {
 	s.RegisterService(&Chat_ServiceDesc, srv)
 }
 
-func _Chat_CreatRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatRoomRequest)
+func _Chat_CreateRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoomRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).CreatRoom(ctx, in)
+		return srv.(ChatServer).CreateRoom(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_CreatRoom_FullMethodName,
+		FullMethod: Chat_CreateRoom_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).CreatRoom(ctx, req.(*CreatRoomRequest))
+		return srv.(ChatServer).CreateRoom(ctx, req.(*CreateRoomRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
+
+func _Chat_History_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).History(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Chat_History_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).History(ctx, req.(*HistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_StreamRoom_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ChatServer).StreamRoom(&grpc.GenericServerStream[StreamRoomStreamingRequest, StreamRoomResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Chat_StreamRoomServer = grpc.BidiStreamingServer[StreamRoomStreamingRequest, StreamRoomResponse]
 
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -125,10 +189,21 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ChatServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreatRoom",
-			Handler:    _Chat_CreatRoom_Handler,
+			MethodName: "CreateRoom",
+			Handler:    _Chat_CreateRoom_Handler,
+		},
+		{
+			MethodName: "History",
+			Handler:    _Chat_History_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamRoom",
+			Handler:       _Chat_StreamRoom_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "goagen_chat_chat.proto",
 }

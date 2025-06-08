@@ -27,26 +27,26 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type CreatRoomRequest struct {
+type CreateRoomRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *CreatRoomRequest) Reset() {
-	*x = CreatRoomRequest{}
+func (x *CreateRoomRequest) Reset() {
+	*x = CreateRoomRequest{}
 	mi := &file_goagen_chat_chat_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreatRoomRequest) String() string {
+func (x *CreateRoomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreatRoomRequest) ProtoMessage() {}
+func (*CreateRoomRequest) ProtoMessage() {}
 
-func (x *CreatRoomRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateRoomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_goagen_chat_chat_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,12 +58,12 @@ func (x *CreatRoomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreatRoomRequest.ProtoReflect.Descriptor instead.
-func (*CreatRoomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateRoomRequest.ProtoReflect.Descriptor instead.
+func (*CreateRoomRequest) Descriptor() ([]byte, []int) {
 	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{0}
 }
 
-type CreatRoomResponse struct {
+type CreateRoomResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -71,20 +71,20 @@ type CreatRoomResponse struct {
 	Field string `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
 }
 
-func (x *CreatRoomResponse) Reset() {
-	*x = CreatRoomResponse{}
+func (x *CreateRoomResponse) Reset() {
+	*x = CreateRoomResponse{}
 	mi := &file_goagen_chat_chat_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreatRoomResponse) String() string {
+func (x *CreateRoomResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreatRoomResponse) ProtoMessage() {}
+func (*CreateRoomResponse) ProtoMessage() {}
 
-func (x *CreatRoomResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateRoomResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_goagen_chat_chat_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -96,16 +96,281 @@ func (x *CreatRoomResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreatRoomResponse.ProtoReflect.Descriptor instead.
-func (*CreatRoomResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateRoomResponse.ProtoReflect.Descriptor instead.
+func (*CreateRoomResponse) Descriptor() ([]byte, []int) {
 	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreatRoomResponse) GetField() string {
+func (x *CreateRoomResponse) GetField() string {
 	if x != nil {
 		return x.Field
 	}
 	return ""
+}
+
+type HistoryRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// The id of the room
+	RoomId string `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+}
+
+func (x *HistoryRequest) Reset() {
+	*x = HistoryRequest{}
+	mi := &file_goagen_chat_chat_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HistoryRequest) ProtoMessage() {}
+
+func (x *HistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goagen_chat_chat_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HistoryRequest.ProtoReflect.Descriptor instead.
+func (*HistoryRequest) Descriptor() ([]byte, []int) {
+	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *HistoryRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+type HistoryResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Field []*Chat2 `protobuf:"bytes,1,rep,name=field,proto3" json:"field,omitempty"`
+}
+
+func (x *HistoryResponse) Reset() {
+	*x = HistoryResponse{}
+	mi := &file_goagen_chat_chat_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HistoryResponse) ProtoMessage() {}
+
+func (x *HistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goagen_chat_chat_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HistoryResponse.ProtoReflect.Descriptor instead.
+func (*HistoryResponse) Descriptor() ([]byte, []int) {
+	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *HistoryResponse) GetField() []*Chat2 {
+	if x != nil {
+		return x.Field
+	}
+	return nil
+}
+
+// Chat
+type Chat2 struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// username
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	// message
+	Message_ string `protobuf:"bytes,2,opt,name=message_,json=message,proto3" json:"message_,omitempty"`
+	// sent_at
+	SentAt int64 `protobuf:"zigzag64,3,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
+}
+
+func (x *Chat2) Reset() {
+	*x = Chat2{}
+	mi := &file_goagen_chat_chat_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Chat2) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Chat2) ProtoMessage() {}
+
+func (x *Chat2) ProtoReflect() protoreflect.Message {
+	mi := &file_goagen_chat_chat_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Chat2.ProtoReflect.Descriptor instead.
+func (*Chat2) Descriptor() ([]byte, []int) {
+	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Chat2) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *Chat2) GetMessage_() string {
+	if x != nil {
+		return x.Message_
+	}
+	return ""
+}
+
+func (x *Chat2) GetSentAt() int64 {
+	if x != nil {
+		return x.SentAt
+	}
+	return 0
+}
+
+type StreamRoomStreamingRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Field string `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+}
+
+func (x *StreamRoomStreamingRequest) Reset() {
+	*x = StreamRoomStreamingRequest{}
+	mi := &file_goagen_chat_chat_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamRoomStreamingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamRoomStreamingRequest) ProtoMessage() {}
+
+func (x *StreamRoomStreamingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goagen_chat_chat_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamRoomStreamingRequest.ProtoReflect.Descriptor instead.
+func (*StreamRoomStreamingRequest) Descriptor() ([]byte, []int) {
+	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *StreamRoomStreamingRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+type StreamRoomResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// username
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	// message
+	Message_ string `protobuf:"bytes,2,opt,name=message_,json=message,proto3" json:"message_,omitempty"`
+	// sent_at
+	SentAt int64 `protobuf:"zigzag64,3,opt,name=sent_at,json=sentAt,proto3" json:"sent_at,omitempty"`
+}
+
+func (x *StreamRoomResponse) Reset() {
+	*x = StreamRoomResponse{}
+	mi := &file_goagen_chat_chat_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamRoomResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamRoomResponse) ProtoMessage() {}
+
+func (x *StreamRoomResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goagen_chat_chat_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamRoomResponse.ProtoReflect.Descriptor instead.
+func (*StreamRoomResponse) Descriptor() ([]byte, []int) {
+	return file_goagen_chat_chat_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *StreamRoomResponse) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *StreamRoomResponse) GetMessage_() string {
+	if x != nil {
+		return x.Message_
+	}
+	return ""
+}
+
+func (x *StreamRoomResponse) GetSentAt() int64 {
+	if x != nil {
+		return x.SentAt
+	}
+	return 0
 }
 
 var File_goagen_chat_chat_proto protoreflect.FileDescriptor
@@ -113,17 +378,48 @@ var File_goagen_chat_chat_proto protoreflect.FileDescriptor
 var file_goagen_chat_chat_proto_rawDesc = []byte{
 	0x0a, 0x16, 0x67, 0x6f, 0x61, 0x67, 0x65, 0x6e, 0x5f, 0x63, 0x68, 0x61, 0x74, 0x5f, 0x63, 0x68,
 	0x61, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x07, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76,
-	0x31, 0x22, 0x12, 0x0a, 0x10, 0x43, 0x72, 0x65, 0x61, 0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x29, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x52, 0x6f,
-	0x6f, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69,
-	0x65, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64,
-	0x32, 0x4a, 0x0a, 0x04, 0x43, 0x68, 0x61, 0x74, 0x12, 0x42, 0x0a, 0x09, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x12, 0x19, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x72, 0x65, 0x61, 0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x1a, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0c, 0x5a, 0x0a,
-	0x2f, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x31, 0x22, 0x13, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x2a, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05,
+	0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x65,
+	0x6c, 0x64, 0x22, 0x29, 0x0a, 0x0e, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6f, 0x6d, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x22, 0x37, 0x0a,
+	0x0f, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x24, 0x0a, 0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x0e, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x68, 0x61, 0x74, 0x32, 0x52,
+	0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x22, 0x57, 0x0a, 0x05, 0x43, 0x68, 0x61, 0x74, 0x32, 0x12,
+	0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x6d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x5f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x73, 0x65, 0x6e, 0x74, 0x5f, 0x61,
+	0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x12, 0x52, 0x06, 0x73, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x22,
+	0x32, 0x0a, 0x1a, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x6f, 0x6f, 0x6d, 0x53, 0x74, 0x72,
+	0x65, 0x61, 0x6d, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a,
+	0x05, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69,
+	0x65, 0x6c, 0x64, 0x22, 0x64, 0x0a, 0x12, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x6f, 0x6f,
+	0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65,
+	0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65,
+	0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x19, 0x0a, 0x08, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x5f, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x12, 0x17, 0x0a, 0x07, 0x73, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x12, 0x52, 0x06, 0x73, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x32, 0xdf, 0x01, 0x0a, 0x04, 0x43, 0x68,
+	0x61, 0x74, 0x12, 0x45, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6f, 0x6d,
+	0x12, 0x1a, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63,
+	0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6f,
+	0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x07, 0x48, 0x69, 0x73,
+	0x74, 0x6f, 0x72, 0x79, 0x12, 0x17, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x48,
+	0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e,
+	0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x52, 0x0a, 0x0a, 0x53, 0x74, 0x72, 0x65, 0x61,
+	0x6d, 0x52, 0x6f, 0x6f, 0x6d, 0x12, 0x23, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x2e,
+	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x6f, 0x6f, 0x6d, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x68, 0x61,
+	0x74, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x6f, 0x6f, 0x6d, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x28, 0x01, 0x30, 0x01, 0x42, 0x0c, 0x5a, 0x0a, 0x2f,
+	0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -138,19 +434,29 @@ func file_goagen_chat_chat_proto_rawDescGZIP() []byte {
 	return file_goagen_chat_chat_proto_rawDescData
 }
 
-var file_goagen_chat_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_goagen_chat_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_goagen_chat_chat_proto_goTypes = []any{
-	(*CreatRoomRequest)(nil),  // 0: chat.v1.CreatRoomRequest
-	(*CreatRoomResponse)(nil), // 1: chat.v1.CreatRoomResponse
+	(*CreateRoomRequest)(nil),          // 0: chat.v1.CreateRoomRequest
+	(*CreateRoomResponse)(nil),         // 1: chat.v1.CreateRoomResponse
+	(*HistoryRequest)(nil),             // 2: chat.v1.HistoryRequest
+	(*HistoryResponse)(nil),            // 3: chat.v1.HistoryResponse
+	(*Chat2)(nil),                      // 4: chat.v1.Chat2
+	(*StreamRoomStreamingRequest)(nil), // 5: chat.v1.StreamRoomStreamingRequest
+	(*StreamRoomResponse)(nil),         // 6: chat.v1.StreamRoomResponse
 }
 var file_goagen_chat_chat_proto_depIdxs = []int32{
-	0, // 0: chat.v1.Chat.CreatRoom:input_type -> chat.v1.CreatRoomRequest
-	1, // 1: chat.v1.Chat.CreatRoom:output_type -> chat.v1.CreatRoomResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: chat.v1.HistoryResponse.field:type_name -> chat.v1.Chat2
+	0, // 1: chat.v1.Chat.CreateRoom:input_type -> chat.v1.CreateRoomRequest
+	2, // 2: chat.v1.Chat.History:input_type -> chat.v1.HistoryRequest
+	5, // 3: chat.v1.Chat.StreamRoom:input_type -> chat.v1.StreamRoomStreamingRequest
+	1, // 4: chat.v1.Chat.CreateRoom:output_type -> chat.v1.CreateRoomResponse
+	3, // 5: chat.v1.Chat.History:output_type -> chat.v1.HistoryResponse
+	6, // 6: chat.v1.Chat.StreamRoom:output_type -> chat.v1.StreamRoomResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_goagen_chat_chat_proto_init() }
@@ -164,7 +470,7 @@ func file_goagen_chat_chat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_goagen_chat_chat_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

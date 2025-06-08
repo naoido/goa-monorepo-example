@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	chatapi "goa-example/microservices/chat"
 	chat "goa-example/microservices/chat/gen/chat"
 	"net"
@@ -39,14 +40,22 @@ func main() {
 		ctx = log.Context(ctx, log.WithDebug())
 		log.Debugf(ctx, "debug logs enabled")
 	}
-	log.Print(ctx, log.KV{K: "http-port", V: *httpPortF})
+
+	opt := &redis.Options{
+		Addr:     fmt.Sprintf("%s:6379", *hostF),
+		Password: "",
+		DB:       0,
+	}
+	client := redis.NewClient(opt)
+	defer client.Close()
 
 	// Initialize the services.
 	var (
 		chatSvc chat.Service
 	)
 	{
-		chatSvc = chatapi.NewChat()
+
+		chatSvc = chatapi.NewChat(client)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services

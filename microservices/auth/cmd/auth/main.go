@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":8090")
+	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("リッスンに失敗しました: %v", err)
 	}
@@ -41,7 +41,7 @@ func main() {
 		srv.GracefulStop()
 	}()
 
-	log.Printf("gRPCサーバーが:8090でリッスンしています")
+	log.Printf("gRPCサーバーが:8080でリッスンしています")
 	if err := srv.Serve(lis); err != nil {
 		log.Fatalf("サービスの提供に失敗しました: %v", err)
 	}

@@ -8,19 +8,58 @@
 package client
 
 import (
+	chat "goa-example/microservices/chat/gen/chat"
 	chatpb "goa-example/microservices/chat/gen/grpc/chat/pb"
 )
 
-// NewProtoCreatRoomRequest builds the gRPC request type from the payload of
-// the "creat-room" endpoint of the "chat" service.
-func NewProtoCreatRoomRequest() *chatpb.CreatRoomRequest {
-	message := &chatpb.CreatRoomRequest{}
+// NewProtoCreateRoomRequest builds the gRPC request type from the payload of
+// the "create-room" endpoint of the "chat" service.
+func NewProtoCreateRoomRequest() *chatpb.CreateRoomRequest {
+	message := &chatpb.CreateRoomRequest{}
 	return message
 }
 
-// NewCreatRoomResult builds the result type of the "creat-room" endpoint of
+// NewCreateRoomResult builds the result type of the "create-room" endpoint of
 // the "chat" service from the gRPC response type.
-func NewCreatRoomResult(message *chatpb.CreatRoomResponse) string {
+func NewCreateRoomResult(message *chatpb.CreateRoomResponse) string {
 	result := message.Field
 	return result
+}
+
+// NewProtoHistoryRequest builds the gRPC request type from the payload of the
+// "history" endpoint of the "chat" service.
+func NewProtoHistoryRequest(payload *chat.HistoryPayload) *chatpb.HistoryRequest {
+	message := &chatpb.HistoryRequest{
+		RoomId: payload.RoomID,
+	}
+	return message
+}
+
+// NewHistoryResult builds the result type of the "history" endpoint of the
+// "chat" service from the gRPC response type.
+func NewHistoryResult(message *chatpb.HistoryResponse) []*chat.Chat {
+	result := make([]*chat.Chat, len(message.Field))
+	for i, val := range message.Field {
+		result[i] = &chat.Chat{
+			Username: val.Username,
+			Message:  val.Message_,
+			SentAt:   val.SentAt,
+		}
+	}
+	return result
+}
+
+func NewStreamRoomResponseChat2(v *chatpb.StreamRoomResponse) *chat.Chat {
+	result := &chat.Chat{
+		Username: v.Username,
+		Message:  v.Message_,
+		SentAt:   v.SentAt,
+	}
+	return result
+}
+
+func NewProtoStreamRoomStreamingRequest(spayload string) *chatpb.StreamRoomStreamingRequest {
+	v := &chatpb.StreamRoomStreamingRequest{}
+	v.Field = spayload
+	return v
 }
