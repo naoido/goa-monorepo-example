@@ -42,9 +42,9 @@ var _ = Service("auth", func() {
 			Response(CodeOK)
 
 			// エラーレスポンス
-			Response("unauthenticated", String)
-			Response("invalid_argument", String)
-			Response("internal", String)
+			Response("unauthenticated", CodeUnauthenticated)
+			Response("invalid_argument", CodeInvalidArgument)
+			Response("internal", CodeInternal)
 		})
 	})
 
